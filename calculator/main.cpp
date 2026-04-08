@@ -1,22 +1,23 @@
-#include <exception>
 #include <string>
-#include <vector>
 #include <iostream>
+#include <stdexcept>
 #include <cctype>
+
+#include "vector_wrapper.hpp"
 #include "helpers.hpp"
 
 using std::cout;
-using std::cin;
 
 
 int main(int argc, char *argv[])
 {
     bool is_quit = false;
     bool is_dot_in_buffer = false;
+    bool is_e_in_buffer = false;
 
     char char_buffer;
     std::string buffer;
-    std::vector<double> stack;
+    VectorWrapper stack;
 
     enableRawMode();
 
@@ -25,39 +26,83 @@ int main(int argc, char *argv[])
         buffer = "";
         cout << " > ";
 
-        while (cin.get(char_buffer))
+        while (std::cin.get(char_buffer))
         {
-            // Behavior of BACKSPACE
-            if (char_buffer == '\x7f')
-            {
-                if (!buffer.empty())
-                {
-                    if (buffer.back() == '.')
-                        is_dot_in_buffer = false;
-
-                    buffer.pop_back();
-                    cout << "\b \b";
-                }
-
-                continue;
-            }
-
-            else if (char_buffer == 'q')
+            // Quit the application
+            if (char_buffer == 'q')
             {
                 is_quit = true;
                 cout << "\n";
                 break;
             }
 
-            // Send data with RET or SPACE
-            else if (char_buffer == '\n' or char_buffer == ' ')
+            // Behavior of BACKSPACE
+            else if (char_buffer == '\x7f')
             {
-                cout << "\n";
+                if (!buffer.empty())
+                {
+                    if (buffer.back() == '.')
+                        is_dot_in_buffer = false;
+
+                    if (buffer.back() == 'e')
+                        is_e_in_buffer = false;
+
+                    buffer.pop_back();
+                    cout << "\b \b";
+                    continue;
+                }
+
+                stack.remove_top();
                 break;
             }
 
-            // Only send '.' or a digit to buffer
-            else if (char_buffer == '.' and not is_dot_in_buffer)
+            // Enable negative numbers
+            else if (char_buffer == '_' && buffer.empty())
+            {
+                buffer.push_back('-');
+                cout << "-";
+            }
+
+            else if (char_buffer == '\t')
+            {
+                if (buffer.empty())
+                    stack.swap_top();
+
+                break;
+            }
+
+            // Send data with RET or SPACE
+            else if (char_buffer == ' ' && !buffer.empty())
+                break;
+
+            else if (char_buffer == '\n')
+            {
+                if (buffer.empty())
+                    stack.duply_top();
+
+                break;
+            }
+
+            // Support decimals and e notation
+            else if (char_buffer == 'e' && !is_e_in_buffer)
+            {
+                if (buffer.empty())
+                {
+                    cout << "1e";
+                    buffer.push_back('1');
+                    buffer.push_back('e');
+                }
+
+                else
+                {
+                    cout << char_buffer;
+                    buffer.push_back(char_buffer);
+                }
+
+                is_e_in_buffer = true;
+            }
+
+            else if (char_buffer == '.' && !is_dot_in_buffer)
             {
                 cout << char_buffer;
                 buffer.push_back(char_buffer);
@@ -75,21 +120,26 @@ int main(int argc, char *argv[])
             break;
 
         is_dot_in_buffer = false;
+        is_e_in_buffer = false;
+
+        // Procesamos el valor del buffer.
+        if (buffer == ".")
+        {
+            stack.print_top();
+            continue;
+        }
 
         try
         {
-            stack.push_back(std::stod(buffer));
+            if (!buffer.empty())
+                stack.push(std::stod(buffer));
 
-            if (buffer.empty())
-                cout << "." << "\n";
-
-            else
-                cout << stack.back() << "\n";
+            stack.print_top();
         }
 
-        catch (std::exception &e)
+        catch (std::invalid_argument &e)
         {
-            cout << "FIXME: Buffer read more than it need" << "\n";
+            cout << "ERROR <push>: Se intento enviar al stack una entrada invalida.\n";
         }
     }
 

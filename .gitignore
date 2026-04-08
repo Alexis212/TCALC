@@ -4,4 +4,5 @@
 tmp/
 *.out
 *.elf
+.clang-format
 backup.cpp

@@ -23,20 +23,3 @@ void disableRawMode()
 {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_term);
 }
-
-double binary_operators(char oper, double a, double b)
-{
-    switch (oper)
-    {
-        case '+':
-            return b + a;
-        case '-':
-            return b - a;
-        case '*':
-            return b * a;
-        case '/':
-            return b / a;
-    }
-
-    return 0;
-}
