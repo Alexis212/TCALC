@@ -1,14 +1,55 @@
 #ifndef HELPERS_H_
 #define HELPERS_H_
 
-#include <termios.h>
-#include <unistd.h>
+#include <cstddef>
+#include <string>
+#include <vector>
+#include <ncurses.h>
 
-extern struct termios old_term;
 
-void enableRawMode();
-void disableRawMode();
+class Window
+{
+public:
+    WINDOW *window;
 
-double binary_operators(char, double, double);
+    inline Window(int y_size, int x_size, int y_pos, int x_pos) {
+        window = newwin(y_size, x_size, y_pos, x_pos);
+    }
+    inline ~Window() { delwin(window); }
+    inline void move(int y, int x) { wmove(window, y, x); }
+    inline void print(const std::string& str) { wprintw(window, "%s", str.c_str()); }
+    inline void refresh() { wrefresh(window); }
+    inline void set_keypad(bool is_enable) { keypad(window, is_enable); }
+    inline void clear_line() { wclrtoeol(window); }
+    inline int getkey() { return wgetch(window); }
+};
+
+
+template<typename T>
+class VectorStack
+{
+public:
+    std::vector<T> stack;
+    VectorStack() = default;
+    inline std::size_t size() { return stack.size(); }
+    inline void push(T value) { stack.push_back(value); }
+    inline bool is_empty() { return stack.empty(); }
+    T& operator[](int index) { return stack[index]; }
+    const T& operator[](int index) const { return stack[index]; }
+    T pop();
+};
+
+
+enum class KeyCode
+{
+    CTRL_A = 1,
+    CTRL_E = 5,
+    CTRL_K = 11,
+    CTRL_H = 8
+};
+
+
+std::string num_to_str(double d);
+void init_ncurses();
 
 #endif // HELPERS_H_

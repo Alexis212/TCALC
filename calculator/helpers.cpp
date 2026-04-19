@@ -1,42 +1,24 @@
 #include "helpers.hpp"
+#include <ncurses.h>
 
-struct termios old_term;
 
-void enableRawMode()
+void init_ncurses()
 {
-    // Obtenemos configuración actual
-    tcgetattr(STDIN_FILENO, &old_term);
-    struct termios new_term = old_term;
-
-    /*
-     * Desactivamos las flags:
-     * ECHO: Se imprimen los caracteres
-     * ICANON: Espera al enter para enviar
-     * IEXTEN: Procesamiento de caracteres extendidos (???)
-     * ISIG: Las señales espaciales (Ctrl+C, Ctrl+D, Ctrl+Z)
-     */
-    new_term.c_lflag &= ~(ECHO | ICANON | IEXTEN | ISIG);
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &new_term);
+    initscr();
+    cbreak();
+    keypad(stdscr, true);
+    noecho();
+    // clear();
+    // refresh();
 }
 
-void disableRawMode()
+
+template<typename T>
+T VectorStack<T>::pop()
 {
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &old_term);
+    T value = stack.top();
+    stack.pop_back();
+    return value;
 }
 
-double binary_operators(char oper, double a, double b)
-{
-    switch (oper)
-    {
-        case '+':
-            return b + a;
-        case '-':
-            return b - a;
-        case '*':
-            return b * a;
-        case '/':
-            return b / a;
-    }
-
-    return 0;
-}
+// mvprintw(row, max_cols/2 - str.length()/2, "%s", str.c_str());
