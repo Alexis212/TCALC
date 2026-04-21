@@ -1,4 +1,5 @@
 #include "helpers.hpp"
+#include <ncurses.h>
 #include <string>
 #include <sstream>
 #include <cstdlib>
@@ -40,12 +41,39 @@ int main(int argc, char *argv[])
             console_window.move(line, 0);
             console_window.clear_line();
             console_window.print(prompt + buffer);
-            console_window.move(line, cursor + prompt.length());
+            console_window.move(line, prompt.length() + cursor);
 
             key = console_window.getkey();
 
+            if (key == KEY_BACKSPACE && !buffer.empty())
+            {
+                buffer.erase(buffer.begin() + cursor - 1);
+                cursor -= 1;
+            }
+
+            else if (key == KEY_RIGHT || key == KeyCode::CTRL_F)
+                cursor += 1;
+
+            else if (key == KEY_LEFT || key == KeyCode::CTRL_B)
+                cursor -= 1;
+
+            else if (key == KeyCode::CTRL_A)
+                cursor = 0;
+
+            else if (key == KeyCode::CTRL_E)
+                cursor = buffer.length();
+
+            else if (key == KeyCode::CTRL_H)
+            {
+                buffer.erase(buffer.begin(), buffer.begin() + cursor);
+                cursor = 0;
+            }
+
+            else if (key == KeyCode::CTRL_K)
+                buffer.erase(buffer.begin() + cursor, buffer.end());
+
             // Check if key was printable character
-            if (key >= 0 && key <= 255)
+            if (key >= 32 && key <= 255)
             {
                 char char_key = char(key);
 

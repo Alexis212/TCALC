@@ -28,8 +28,9 @@ public:
 template<typename T>
 class VectorStack
 {
-public:
+private:
     std::vector<T> stack;
+public:
     VectorStack() = default;
     inline std::size_t size() { return stack.size(); }
     inline void push(T value) { stack.push_back(value); }
@@ -40,10 +41,12 @@ public:
 };
 
 
-enum class KeyCode
+enum KeyCode
 {
     CTRL_A = 1,
+    CTRL_B = 2,
     CTRL_E = 5,
+    CTRL_F = 6,
     CTRL_K = 11,
     CTRL_H = 8
 };

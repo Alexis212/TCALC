@@ -5,3 +5,4 @@ tmp/
 *.out
 *.elf
 .clang-format
+main.log
