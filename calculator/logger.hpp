@@ -15,7 +15,7 @@ public:
     ~Logger() { logFile.close(); }
     void log(const std::string &msg)
     {
-        logFile << msg << std::endl;
+        logFile << msg << "\n";
         logFile.flush();
     }
 };

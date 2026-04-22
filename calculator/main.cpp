@@ -19,13 +19,11 @@ int main(int argc, char *argv[])
     int max_rows, max_cols;
     getmaxyx(stdscr, max_rows, max_cols);
 
-    // Title Windows
     Window title_window = Window(3, max_cols, 0, 0);
     title_window.move(1, max_cols/2 - title.length()/2);
     title_window.print(title);
     title_window.refresh();
 
-    // Console Windows
     Window console_window = Window(max_rows - 3, max_cols, 3, 0);
     console_window.set_keypad(true);
 
@@ -51,10 +49,10 @@ int main(int argc, char *argv[])
                 cursor -= 1;
             }
 
-            else if (key == KEY_RIGHT || key == KeyCode::CTRL_F)
+            else if ((key == KEY_RIGHT || key == KeyCode::CTRL_F) && cursor < buffer.length())
                 cursor += 1;
 
-            else if (key == KEY_LEFT || key == KeyCode::CTRL_B)
+            else if ((key == KEY_LEFT || key == KeyCode::CTRL_B) && cursor > 0)
                 cursor -= 1;
 
             else if (key == KeyCode::CTRL_A)
@@ -119,6 +117,5 @@ int main(int argc, char *argv[])
     }
 
     endwin();
-
     return 0;
 }

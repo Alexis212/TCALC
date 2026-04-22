@@ -47,12 +47,11 @@ enum KeyCode
     CTRL_B = 2,
     CTRL_E = 5,
     CTRL_F = 6,
-    CTRL_K = 11,
-    CTRL_H = 8
+    CTRL_H = 8,
+    CTRL_K = 11
 };
 
 
-std::string num_to_str(double d);
 void init_ncurses();
 
 #endif // HELPERS_H_

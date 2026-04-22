@@ -6,6 +6,8 @@ void init_ncurses()
 {
     initscr();
     cbreak();
+    // raw();
+    nonl();
     keypad(stdscr, true);
     noecho();
     // clear();
@@ -20,5 +22,3 @@ T VectorStack<T>::pop()
     stack.pop_back();
     return value;
 }
-
-// mvprintw(row, max_cols/2 - str.length()/2, "%s", str.c_str());
