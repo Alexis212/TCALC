@@ -2,7 +2,8 @@
 .idea
 *.log
 tmp/
+*.o
 *.out
 *.elf
-.clang-format
+main
 main.log

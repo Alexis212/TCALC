@@ -1,4 +1,5 @@
 #include "helpers.hpp"
+#include "VectorWrappers.hpp"
 #include <ncurses.h>
 #include <string>
 #include <sstream>
@@ -11,7 +12,7 @@ int main(int argc, char *argv[])
     const std::string title = "TCALC: A SIMPLE TERMINAL CALCULATOR";
     const std::string prompt = "  > ";
 
-    VectorStack<double> stack;
+    IterableStackHistory<double> stack;
     std::string buffer;
 
     init_ncurses();
@@ -36,6 +37,11 @@ int main(int argc, char *argv[])
 
         while (true)
         {
+            // Delete previous console line in case of undo
+            console_window.move(line + 1, 0);
+            console_window.clear_line();
+
+            // Reprint console line
             console_window.move(line, 0);
             console_window.clear_line();
             console_window.print(prompt + buffer);
@@ -61,7 +67,7 @@ int main(int argc, char *argv[])
             else if (key == KeyCode::CTRL_E)
                 cursor = buffer.length();
 
-            else if (key == KeyCode::CTRL_H)
+            else if (key == KeyCode::CTRL_U)
             {
                 buffer.erase(buffer.begin(), buffer.begin() + cursor);
                 cursor = 0;
@@ -69,6 +75,9 @@ int main(int argc, char *argv[])
 
             else if (key == KeyCode::CTRL_K)
                 buffer.erase(buffer.begin() + cursor, buffer.end());
+
+            else if (key == KeyCode::ENTER)
+                break;
 
             // Check if key was printable character
             if (key >= 32 && key <= 255)
@@ -81,8 +90,20 @@ int main(int argc, char *argv[])
                     cursor += 1;
                 }
 
-                if (char_key == '\n')
-                    break;
+                if (char_key == 'u')
+                {
+                    if (buffer.empty() && !stack.is_empty())
+                    {
+                        stack.undo();
+                        break;
+                    }
+
+                    else
+                    {
+                        buffer = "";
+                        cursor = 0;
+                    }
+                }
 
                 if (char_key == 'q')
                 {
@@ -95,14 +116,18 @@ int main(int argc, char *argv[])
         if (is_exit)
             break;
 
-        try
+        if (!buffer.empty())
         {
-            double number = std::stod(buffer);
-            stack.push(number);
-        }
-        catch (const std::invalid_argument& e)
-        {
-            console_window.print("Error: Entrada <" + buffer + "> no reconocida como valida.");
+            try
+            {
+                double number = std::stod(buffer);
+                stack.push(number);
+            }
+
+            catch (const std::invalid_argument& e)
+            {
+                console_window.print("Error: Entrada <" + buffer + "> no reconocida como valida.");
+            }
         }
 
         for (size_t i = 0; i < stack.size(); i++)

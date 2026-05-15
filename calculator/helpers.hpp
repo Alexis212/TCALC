@@ -1,9 +1,7 @@
 #ifndef HELPERS_H_
 #define HELPERS_H_
 
-#include <cstddef>
 #include <string>
-#include <vector>
 #include <ncurses.h>
 
 
@@ -16,28 +14,13 @@ public:
         window = newwin(y_size, x_size, y_pos, x_pos);
     }
     inline ~Window() { delwin(window); }
+
     inline void move(int y, int x) { wmove(window, y, x); }
     inline void print(const std::string& str) { wprintw(window, "%s", str.c_str()); }
     inline void refresh() { wrefresh(window); }
     inline void set_keypad(bool is_enable) { keypad(window, is_enable); }
     inline void clear_line() { wclrtoeol(window); }
     inline int getkey() { return wgetch(window); }
-};
-
-
-template<typename T>
-class VectorStack
-{
-private:
-    std::vector<T> stack;
-public:
-    VectorStack() = default;
-    inline std::size_t size() { return stack.size(); }
-    inline void push(T value) { stack.push_back(value); }
-    inline bool is_empty() { return stack.empty(); }
-    T& operator[](int index) { return stack[index]; }
-    const T& operator[](int index) const { return stack[index]; }
-    T pop();
 };
 
 
@@ -48,7 +31,9 @@ enum KeyCode
     CTRL_E = 5,
     CTRL_F = 6,
     CTRL_H = 8,
-    CTRL_K = 11
+    CTRL_K = 11,
+    ENTER = 13,
+    CTRL_U = 21,
 };
 
 

@@ -13,12 +13,3 @@ void init_ncurses()
     // clear();
     // refresh();
 }
-
-
-template<typename T>
-T VectorStack<T>::pop()
-{
-    T value = stack.top();
-    stack.pop_back();
-    return value;
-}
