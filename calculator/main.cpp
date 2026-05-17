@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     const std::string title = "TCALC: A SIMPLE TERMINAL CALCULATOR";
     const std::string prompt = "  > ";
 
-    IterableStackHistory<double> stack;
+    RNPCalc calc;
     std::string buffer;
 
     init_ncurses();
@@ -92,9 +92,9 @@ int main(int argc, char *argv[])
 
                 if (char_key == 'u')
                 {
-                    if (buffer.empty() && !stack.is_empty())
+                    if (buffer.empty() && !calc.get_stack().is_empty())
                     {
-                        stack.undo();
+                        calc.undo();
                         break;
                     }
 
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
             try
             {
                 double number = std::stod(buffer);
-                stack.push(number);
+                calc.insert(number);
             }
 
             catch (const std::invalid_argument& e)
@@ -130,15 +130,15 @@ int main(int argc, char *argv[])
             }
         }
 
-        for (size_t i = 0; i < stack.size(); i++)
+        for (size_t i = 0; i < calc.get_stack().size(); i++)
         {
             console_window.move(i, 2);
             std::stringstream ss;
-            ss << i + 1 << ": " << stack[i];
+            ss << i + 1 << ": " << calc.get_stack()[i];
             console_window.print(ss.str());
         }
 
-        line = stack.size();
+        line = calc.get_stack().size();
     }
 
     endwin();

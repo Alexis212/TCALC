@@ -14,11 +14,11 @@ private:
     std::vector<T> stack;
 public:
     IterableStack() = default;
-    inline std::size_t size() const { return stack.size(); }
-    inline bool is_empty() const { return stack.empty(); }
+    std::size_t size() const { return stack.size(); }
+    bool is_empty() const { return stack.empty(); }
     const T& operator[](std::size_t index) const { return stack[index]; }
 
-    inline void push(T value) { stack.push_back(value); }
+    void push(T value) { stack.push_back(value); }
     T pop()
     {
         if (is_empty())
@@ -32,44 +32,87 @@ public:
 
 
 template <typename T>
-class IterableStackHistory
+class ObjectHistory
 {
 private:
-    IterableStack<T> stack;
-    std::stack <IterableStack <T>> undo_stack;
-    std::stack <IterableStack <T>> redo_stack;
+    std::stack <T> undo_stack;
+    std::stack <T> redo_stack;
 public:
-    IterableStackHistory() = default;
+    ObjectHistory() = default;
 
-    // Adapted Interface
-    inline std::size_t size() { return stack.size(); }
-    inline bool is_empty() { return stack.is_empty(); }
-    const T& operator[](int index) const { return stack[index]; }
+    bool can_undo() { return !undo_stack.empty(); }
+    bool can_redo() { return !redo_stack.empty(); }
 
-    // New Methods
-    void push(T value)
+    void save_state(T snapshot)
     {
-        IterableStack<T> old_state = stack;
-        undo_stack.push(old_state);
+        // Save current state in undo stack
+        undo_stack.push(snapshot);
+
+        // Clean redo stack
+        redo_stack = std::stack<T>();
+    }
+
+    T undo(T snapshot)
+    {
+        if (!can_undo())
+            throw std::out_of_range("Error: The undo stack is empty.");
+
+        // Save current state in redo stack
+        redo_stack.push(snapshot);
+
+        // Get previous state
+        T old_state = undo_stack.top();
+        undo_stack.pop();
+
+        // Set previous state
+        return old_state;
+    }
+
+    T redo(T snapshot)
+    {
+        if (!can_redo())
+            throw std::out_of_range("Error: The redo stack is empty.");
+
+        // Get redo state
+        T redo_state = redo_stack.top();
+        redo_stack.pop();
+
+        // Save current state into undo stack
+        undo_stack.push(snapshot);
+
+        // Set the new state
+        return redo_state;
+    }
+};
+
+
+class RNPCalc
+{
+private:
+    IterableStack<double> stack;
+    ObjectHistory <IterableStack <double>> history;
+public:
+    RNPCalc() = default;
+
+    const IterableStack<double> &get_stack() const { return stack; };
+
+    void insert(double value)
+    {
+        history.save_state(stack);
         stack.push(value);
     }
 
-    T pop()
-    {
-        return stack.pop();
-    }
-
-    // New Data
     void undo()
     {
-        IterableStack<T> current_state = stack;
-        IterableStack<T> old_state = undo_stack.top();
-        undo_stack.pop();
-        redo_stack.push(current_state);
-        stack = old_state;
+        if (history.can_undo())
+            stack = history.undo(stack);
     }
 
-    void redo();
+    void redo()
+    {
+        if (history.can_redo())
+            stack = history.redo(stack);
+    }
 };
 
 #endif // VECTORWRAPPERS_H_

@@ -10,6 +10,4 @@ void init_ncurses()
     nonl();
     keypad(stdscr, true);
     noecho();
-    // clear();
-    // refresh();
 }
